@@ -1,13 +1,12 @@
-from pynput import keyboard
+from pynput import keyboard, mouse
 from pynput.mouse import Controller as MouseController
 from datetime import datetime
+import subprocess
 import json
 import uuid
-import os
-import subprocess
 
-mouse = MouseController()
-LOG_FILE = "keystrokes.jsonl"  # Each line is a separate JSON object
+LOG_FILE = "input_events.jsonl"
+mouse_controller = MouseController()
 
 def get_active_app():
     try:
@@ -19,28 +18,41 @@ def get_active_app():
     except Exception as e:
         return f"Unknown ({e})"
 
-def log_event(key):
+def log_event(event_type, key_or_button):
     event_data = {
         "id": str(uuid.uuid4()),
         "timestamp": datetime.now().isoformat(),
-        "event_type": "key_press",
-        "key_or_button": str(getattr(key, 'char', key)),  # Fallback for special keys
-        "position_x": mouse.position[0],
-        "position_y": mouse.position[1],
+        "event_type": event_type,
+        "key_or_button": str(key_or_button),
+        "position_x": mouse_controller.position[0],
+        "position_y": mouse_controller.position[1],
         "active_app": get_active_app()
     }
-
     with open(LOG_FILE, "a") as f:
         f.write(json.dumps(event_data) + "\n")
 
-def on_press(key):
-    log_event(key)
+# Keyboard Handlers
+def on_key_press(key):
+    log_event("key_press", getattr(key, 'char', key))
 
-def on_release(key):
+def on_key_release(key):
     if key == keyboard.Key.esc:
-        return False  # Stop the logger
+        return False  # Stops both listeners
 
+# Mouse Handlers
+def on_click(x, y, button, pressed):
+    if pressed:
+        log_event("mouse_click", button)
+
+# Start listeners
 if __name__ == "__main__":
-    print("Keylogger started. Press ESC to stop.")
-    with keyboard.Listener(on_press=on_press, on_release=on_release) as listener:
-        listener.join()
+    print("Tracking keys and clicks. Press ESC to stop.")
+
+    keyboard_listener = keyboard.Listener(on_press=on_key_press, on_release=on_key_release)
+    mouse_listener = mouse.Listener(on_click=on_click)
+
+    keyboard_listener.start()
+    mouse_listener.start()
+
+    keyboard_listener.join()
+    mouse_listener.stop()
