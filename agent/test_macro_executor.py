@@ -151,14 +151,25 @@ async def check_completion(ctx: Context):
         # If there was an error, exit with error code
         if ctx.storage.get("test_error"):
             print(f"❌ Test failed: {ctx.storage.get('test_error')}")
-            sys.exit(1)
+            ctx.storage.set("exit_code", 1)
         else:
             print("✅ Test completed successfully")
-            sys.exit(0)
+            ctx.storage.set("exit_code", 0)
+        
+        # Set a flag to indicate we should exit
+        ctx.storage.set("should_exit", True)
 
 if __name__ == "__main__":
     # Include the protocol
     test_agent.include(test_proto)
     
-    # Run the agent
-    test_agent.run() 
+    try:
+        # Run the agent
+        test_agent.run()
+    except KeyboardInterrupt:
+        print("\n👋 Shutting down test agent...")
+    finally:
+        # Get the exit code from storage
+        exit_code = test_agent.storage.get("exit_code", 0)
+        if test_agent.storage.get("should_exit"):
+            sys.exit(exit_code) 
