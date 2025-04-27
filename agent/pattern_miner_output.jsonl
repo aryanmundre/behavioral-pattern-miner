@@ -1,0 +1,87 @@
+[
+  {
+    "id": 1,
+    "normalized_pattern": [
+      "AppSwitch(Browser→VSCode)",
+      "Key(cmd+o)",
+      "TypeText(*)",
+      "Key(enter)"
+    ],
+    "support": 17,
+    "examples": [
+      ["AppSwitch(Browser→VSCode)", "Key(cmd+o)", "TypeText(\"hw1.py\")", "Key(enter)"],
+      ["AppSwitch(Browser→VSCode)", "Key(cmd+o)", "TypeText(\"project.py\")", "Key(enter)"],
+      ["AppSwitch(Browser→VSCode)", "Key(cmd+o)", "TypeText(\"lab2.ipynb\")", "Key(enter)"]
+    ]
+  },
+  {
+    "id": 2,
+    "normalized_pattern": [
+      "AppSwitch(VSCode→Browser)",
+      "TypeText(*)",
+      "Key(enter)",
+      "Key(tab)",
+      "Key(tab)",
+      "Key(enter)"
+    ],
+    "support": 10,
+    "examples": [
+      [
+        "AppSwitch(VSCode→Browser)",
+        "TypeText(\"https://canvas.uni.edu/courses/123/assignments/456\")",
+        "Key(enter)",
+        "Key(tab)",
+        "Key(tab)",
+        "Key(enter)"
+      ],
+      [
+        "AppSwitch(VSCode→Browser)",
+        "TypeText(\"https://gradescope.com/courses/789/assignments/1011\")",
+        "Key(enter)",
+        "Key(tab)",
+        "Key(tab)",
+        "Key(enter)"
+      ]
+    ]
+  },
+  {
+    "id": 3,
+    "normalized_pattern": [
+      "AppSwitch(VSCode→Browser)",
+      "Paste",
+      "Key(enter)"
+    ],
+    "support": 8,
+    "examples": [
+      ["AppSwitch(VSCode→Browser)", "Paste", "Key(enter)"],
+      ["AppSwitch(VSCode→Browser)", "Paste", "Key(enter)"],
+      ["AppSwitch(VSCode→Browser)", "Paste", "Key(enter)"]
+    ]
+  },
+  {
+    "id": 4,
+    "normalized_pattern": [
+      "Key(ctrl+shift+p)",
+      "TypeText(*)",
+      "Key(enter)"
+    ],
+    "support": 22,
+    "examples": [
+      ["Key(ctrl+shift+p)", "TypeText(\"Python: Run Test\")", "Key(enter)"],
+      ["Key(ctrl+shift+p)", "TypeText(\"Debug: Start\")", "Key(enter)"]
+    ]
+  },
+  {
+    "id": 5,
+    "normalized_pattern": [
+      "BS_RUN",
+      "TypeText(*)",
+      "Key(enter)"
+    ],
+    "support": 19,
+    "examples": [
+      ["Key(backspace)", "Key(backspace)", "TypeText(\"def solve():\")", "Key(enter)"],
+      ["Key(backspace)", "Key(backspace)", "Key(backspace)", "TypeText(\"print(\\\"Test\\\")\")", "Key(enter)"]
+    ]
+  }
+]
