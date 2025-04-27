@@ -103,7 +103,7 @@ def execute_step(step):
                 # On Linux:
                 else:
                     subprocess.Popen(["google-chrome", playlist_url])
-                time.sleep(5)  # wait for page to load
+                time.sleep(2)  # wait for page to load
                 
                 # Toggle play/pause
                 pyautogui.press("space")

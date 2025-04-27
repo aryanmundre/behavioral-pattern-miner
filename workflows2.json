@@ -1,0 +1,32 @@
+{
+    "id": "spotify_play_web",
+    "steps": [
+      {
+        "app": "Google Chrome",
+        "action": "launch",
+        "args": {}
+      },
+      {
+        "app": "Google Chrome",
+        "action": "open_url",
+        "args": {
+          "url": "https://open.spotify.com/playlist/37i9dQZF1DXcBWIGoYBM5M"
+        }
+      },
+      {
+        "app": "Google Chrome",
+        "action": "wait",
+        "args": {
+          "seconds": 2
+        }
+      },
+      {
+        "app": "Google Chrome",
+        "action": "keypress",
+        "args": {
+          "key": "space"
+        }
+      }
+    ]
+  }
+  
