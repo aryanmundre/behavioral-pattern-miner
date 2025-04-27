@@ -2,6 +2,8 @@ import json
 import yaml
 import time
 import os
+import sys
+import subprocess
 import pyautogui
 import socket
 from flask import Flask, request, jsonify
@@ -55,7 +57,7 @@ def execute_step(step):
     app = step['app']
     action = step['action']
     args = step['args']
-    
+
     try:
         if app in ["Code", "VSCode"]:
             if action == "open_file":
@@ -87,11 +89,34 @@ def execute_step(step):
                 time.sleep(1)  # Wait for save to complete
             else:
                 raise ValueError(f"Unknown action for {app}: {action}")
+        elif app == "Spotify":
+            if action == "play_playlist":
+                playlist_url = args.get('url', "https://open.spotify.com/playlist/37i9dQZF1DXcBWIGoYBM5M")
+                print(f"Opening Spotify playlist: {playlist_url}")
+                
+                # On macOS: force-open in Chrome
+                if sys.platform == "darwin":
+                    subprocess.Popen(["open", "-a", "Google Chrome", playlist_url])
+                # On Windows:
+                elif sys.platform.startswith("win"):
+                    subprocess.Popen(["cmd", "/c", "start", "chrome", playlist_url], shell=True)
+                # On Linux:
+                else:
+                    subprocess.Popen(["google-chrome", playlist_url])
+                time.sleep(5)  # wait for page to load
+                
+                # Toggle play/pause
+                pyautogui.press("space")
+            else:
+                raise ValueError(f"Unknown action for {app}: {action}")
         else:
             raise ValueError(f"Unknown app: {app}")
     except Exception as e:
         print(f"Error executing step: {str(e)}")
         raise
+
+
+
 
 @app.route('/macro', methods=['POST'])
 def handle_macro():
