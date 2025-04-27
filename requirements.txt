@@ -1,3 +1,0 @@
-uagents
-requests
-sqlite3

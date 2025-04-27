@@ -1,31 +1,149 @@
-# Maqro
+# Workflow Habit Optimizer
 
-## Overview
+A desktop agent that captures app usage patterns, suggests macros, and executes them automatically.
 
-In modern development workflows, repetitive setup tasks — like opening Visual Studio Code, pushing to GitHub, and updating Slack — waste valuable time every day.
+## System Architecture
 
-We built **Maqro**, a two-agent system using **Fetch.ai’s uAgents framework** and **ASI-1 Mini LLM**, that:
+The system consists of the following components:
 
-- **Learns your repeated habits** automatically by tracking app usage.
-- **Suggests bundling habits into smart macros.**
-- **Lets users refine workflows naturally** (e.g., "after GitHub push, add a Notion note and Slack the team").
-- **Uses ASI-1 Mini to intelligently improve and structure macros.**
-- **Automatically executes saved macros** via a dedicated Macro Executor Agent.
+1. **Tracker Service**
+   - Captures app usage, clicks, keystrokes into json files
+   - Views 10000 actions at a time in a sliding window
 
-✅ **Agent-driven.  
-✅ AI-refined.  
-✅ Actionable automation.**
+2. **ML Pattern Miner**
+   - Analyzes sessions to find repeated workflows
 
----
+3. **Macro Trainer Agent**
+   - Receives detected workflows
+   - Suggests macros to user
+   - Lets user accept or refine via natural language
+   - Calls ASI-1 Mini for macro refinement
+   - After user confirmation, sends final macro to Executor Agent
 
-## Architecture
+4. **Macro Executor Agent**
+   - Receives macro steps
+   - Opens apps, websites, simulates actions using pyautogui/os.system
 
-| Agent | Role |
-|:---|:---|
-| **Macro Trainer Agent** | - Detects user workflow patterns.<br>- Suggests macros.<br>- Refines macros using ASI-1 Mini based on user input.<br>- Saves final macro JSON. |
-| **Macro Executor Agent** | - Receives macro steps.<br>- Opens apps, websites, and triggers API actions.<br>- Simulates real workflow execution. |
+## Installation
 
-Agents communicate through **uAgents** messaging over Fetch.ai's agent framework.
+1. Clone the repository:
+```bash
+git clone https://github.com/yourusername/workflow-habit-optimizer.git
+cd workflow-habit-optimizer
+```
+
+2. Install dependencies:
+```bash
+pip install -r requirements.txt
+```
+
+3. Set up environment variables:
+```bash
+# Required: ASI-1 Mini API key
+export ASI1_API_KEY="your_api_key_here"
+```
+
+## Usage
+
+### Quick Start
+
+The easiest way to start the system is to use the `start_agents.py` script:
+
+```bash
+python agent/start_agents.py
+```
+
+This will start all agents in the correct order:
+1. Macro Trainer Agent (port 8001)
+2. Macro Executor Agent (port 8002)
+3. Test Workflow (port 8003)
+
+### Manual Start
+
+If you need to start agents individually:
+
+1. Start the Macro Trainer Agent:
+```bash
+python agent/macro_trainer_agent.py
+```
+
+2. Start the Macro Executor Agent:
+```bash
+python agent/macro_executor_agent.py
+```
+
+3. Run the test workflow:
+```bash
+python agent/test_workflow.py
+```
+
+### Testing the System
+
+The test workflow demonstrates the following process:
+
+1. A pattern is submitted to the Macro Trainer Agent
+2. The Macro Trainer Agent analyzes the pattern and suggests a macro
+3. The user accepts the macro suggestion
+4. The Macro Trainer Agent sends the macro to the Macro Executor Agent
+5. The Macro Executor Agent executes the macro steps
+
+## Supported Actions
+
+The system supports the following actions:
+
+1. **Keyboard Actions**
+   - Single key presses
+   - Keyboard shortcuts (e.g., command+l)
+   - Text typing
+
+2. **Mouse Actions**
+   - Clicks at specific coordinates
+
+3. **App Actions**
+   - Launching applications
+   - Opening websites
+
+## Supported Applications
+
+The system supports the following applications:
+
+- Visual Studio Code
+- Slack
+- Google Chrome
+- Safari
+- Terminal
+- Finder
+- Notes
+- Calendar
+- Mail
+- Messages
+- Photos
+- Music
+- Preview
+- Calculator
+- System Settings
+
+## Supported Websites
+
+The system supports the following websites:
+
+- GitHub
+- Notion
+- Gmail
+- Google Calendar
+- Google Drive
+- Google Docs
+- Google Sheets
+- Google Slides
+- YouTube
+- LinkedIn
+- Twitter
+- Facebook
+- Instagram
+
+## License
+
+MIT
 
 ---
 

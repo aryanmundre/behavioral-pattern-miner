@@ -1,0 +1,7 @@
+{
+    "test_started": true,
+    "test_completed": true,
+    "test_error": "PatternMiner.__init__() missing 1 required positional argument: 'jsonl_path'",
+    "exit_code": 1,
+    "should_exit": true
+}
