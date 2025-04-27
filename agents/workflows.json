@@ -2,23 +2,11 @@
   "id": "demo1",
   "steps": [
     {
-      "app": "Code",
-      "action": "open_file",
+      "app": "Spotify",
+      "action": "play_playlist",
       "args": {
-        "path": "demo.py"
+        "url": "https://open.spotify.com/playlist/37i9dQZF1DX0XUsuxWHRQd"
       }
-    },
-    {
-      "app": "Code",
-      "action": "type",
-      "args": {
-        "text": "print('Hello, world!')"
-      }
-    },
-    {
-      "app": "Code",
-      "action": "save_file",
-      "args": {}
     }
   ]
 }

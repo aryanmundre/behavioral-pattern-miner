@@ -82,6 +82,7 @@ def refine_macro(macro):
     print("Examples:")
     print("- Change the file type to Swift instead of Python")
     print("- After pushing to GitHub, open Notion to track the PR and send a Slack message")
+    print("- Play my favorite Spotify playlist")
     print("- Add a delay between steps")
     print("- Make the typing faster")
     user_input = input("\nYour refinement request: ")
@@ -98,8 +99,8 @@ User instruction: {user_input}
 Return ONLY a JSON array of steps that implements the requested changes. The steps should follow this format:
 [
   {{
-    "app": "AppName",  // e.g., "Code", "Notion", "Slack", "GitHub"
-    "action": "action_name",  // e.g., "open_file", "type", "save_file", "open_url", "send_message"
+    "app": "AppName",  // e.g., "Code", "Notion", "Slack", "GitHub", "Spotify"
+    "action": "action_name",  // e.g., "open_file", "type", "save_file", "open_url", "send_message", "play_playlist"
     "args": {{}}  // Arguments specific to the action
   }}
 ]
@@ -120,6 +121,11 @@ Available apps and their actions:
 4. GitHub:
    - open_pr: {{"repo": "repo_name", "branch": "branch_name"}}
    - push_changes: {{"message": "commit_message"}}
+   
+5. Spotify:
+   - play_playlist: {{"url": "https://open.spotify.com/playlist/PLAYLIST_ID"}}
+   Note: For Spotify playlists, always use the web URL format (https://open.spotify.com/playlist/...) 
+   and not the URI format (spotify:playlist:...).
 
 Return ONLY the JSON array with no additional text or explanation."""
     
@@ -154,6 +160,14 @@ Return ONLY the JSON array with no additional text or explanation."""
             if not all(key in step for key in ['app', 'action', 'args']):
                 print("Each step must have 'app', 'action', and 'args' fields. Using original macro.")
                 return macro
+            
+            # Convert Spotify URI format to web URL format
+            if step['app'].lower() == 'spotify' and step['action'].lower() == 'play_playlist':
+                url = step['args'].get('url', '')
+                if url.startswith('spotify:playlist:'):
+                    playlist_id = url.replace('spotify:playlist:', '')
+                    step['args']['url'] = f"https://open.spotify.com/playlist/{playlist_id}"
+                    print(f"Converted Spotify URI to web URL: {step['args']['url']}")
         
         # Create new macro with refined steps
         refined_macro = macro.copy()

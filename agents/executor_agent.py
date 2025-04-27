@@ -54,12 +54,12 @@ async def startup(ctx: Context):
         print("Warning: Could not fund agent wallet. Continuing without funding.")
 
 def execute_step(step):
-    app = step['app']
-    action = step['action']
+    app = step['app'].lower()  # Convert app name to lowercase
+    action = step['action'].lower()  # Convert action to lowercase
     args = step['args']
 
     try:
-        if app in ["Code", "VSCode"]:
+        if app in ["code", "vscode"]:
             if action == "open_file":
                 # Replace timestamp placeholder with actual timestamp
                 file_path = args['path'].replace('${timestamp}', time.strftime('%Y%m%d_%H%M%S'))
@@ -89,7 +89,7 @@ def execute_step(step):
                 time.sleep(1)  # Wait for save to complete
             else:
                 raise ValueError(f"Unknown action for {app}: {action}")
-        elif app == "Spotify":
+        elif app == "spotify":
             if action == "play_playlist":
                 playlist_url = args.get('url', "https://open.spotify.com/playlist/37i9dQZF1DXcBWIGoYBM5M")
                 print(f"Opening Spotify playlist: {playlist_url}")
