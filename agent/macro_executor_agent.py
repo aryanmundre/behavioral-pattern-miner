@@ -262,72 +262,102 @@ class MacroExecutor:
 
 # -------------- Protocol Logic --------------
 
+# Create a single executor instance
 executor = MacroExecutor()
 
 @macro_executor_proto.on_message(model=MessageEnvelope)
-async def handle_message(ctx: Context, sender: str, request: MessageEnvelope):
-    try:
-        ctx.logger.info(f"Received message: {request}")
-        
-        if request.type == "ExecuteMacroRequest":
-            macro_request = ExecuteMacroRequest(**request.content)
-            ctx.logger.info(f"⚡ Executing Macro: {macro_request.macro_id}")
+async def handle_message(ctx: Context, sender: str, msg: MessageEnvelope):
+    logger.info(f"Received message: {msg.type} from {sender}")
+    
+    if msg.type == "ExecuteMacroRequest":
+        try:
+            request = ExecuteMacroRequest(**msg.content)
+            logger.info(f"Executing macro: {request.macro_id}")
+            logger.info(f"Steps: {[step.__dict__ for step in request.steps]}")
             
-            # Start macro execution in background
-            asyncio.create_task(executor.execute_macro(
-                macro_request.macro_id,
-                macro_request.steps
-            ))
+            # Execute the macro
+            await executor.execute_macro(request.macro_id, request.steps)
             
-        elif request.type == "PauseMacroRequest":
-            macro_id = request.content.get("macro_id")
-            if executor.pause_macro(macro_id):
-                ctx.logger.info(f"⏸️ Paused macro: {macro_id}")
-            else:
-                ctx.logger.warning(f"Could not pause macro: {macro_id}")
-                
-        elif request.type == "ResumeMacroRequest":
-            macro_id = request.content.get("macro_id")
-            if executor.resume_macro(macro_id):
-                ctx.logger.info(f"▶️ Resumed macro: {macro_id}")
-            else:
-                ctx.logger.warning(f"Could not resume macro: {macro_id}")
-                
-        elif request.type == "CancelMacroRequest":
-            macro_id = request.content.get("macro_id")
-            if executor.cancel_macro(macro_id):
-                ctx.logger.info(f"❌ Cancelled macro: {macro_id}")
-            else:
-                ctx.logger.warning(f"Could not cancel macro: {macro_id}")
-                
-        elif request.type == "GetMacroStatusRequest":
-            macro_id = request.content.get("macro_id")
-            status = executor.get_macro_status(macro_id)
+            # Send status update
+            status = executor.get_macro_status(request.macro_id)
             if status:
-                ctx.logger.info(f"📊 Macro status: {status}")
-                # Send status back to requester
-                await ctx.send(sender, MessageEnvelope(
+                logger.info(f"Sending status update: {status.dict()}")
+                await ctx.send(
+                    sender,
+                    MessageEnvelope(
+                        receiver=sender,
+                        protocol="macro_executor_protocol",
+                        type="MacroStatusResponse",
+                        content=status.dict()
+                    )
+                )
+        except Exception as e:
+            logger.error(f"Error executing macro: {str(e)}")
+            await ctx.send(
+                sender,
+                MessageEnvelope(
                     receiver=sender,
                     protocol="macro_executor_protocol",
                     type="MacroStatusResponse",
-                    content=status.dict()
-                ))
-            else:
-                ctx.logger.warning(f"Could not find macro: {macro_id}")
-                
-        else:
-            ctx.logger.warning(f"Received unknown message type: {request.type}")
-            
-    except Exception as e:
-        ctx.logger.error(f"Error processing message: {str(e)}")
-        raise
+                    content={
+                        "macro_id": request.macro_id,
+                        "state": "failed",
+                        "current_step": 0,
+                        "total_steps": len(request.steps),
+                        "error": str(e)
+                    }
+                )
+            )
 
+    elif msg.type == "PauseMacroRequest":
+        macro_id = msg.content.get("macro_id")
+        if executor.pause_macro(macro_id):
+            logger.info(f"⏸️ Paused macro: {macro_id}")
+        else:
+            logger.warning(f"Could not pause macro: {macro_id}")
+            
+    elif msg.type == "ResumeMacroRequest":
+        macro_id = msg.content.get("macro_id")
+        if executor.resume_macro(macro_id):
+            logger.info(f"▶️ Resumed macro: {macro_id}")
+        else:
+            logger.warning(f"Could not resume macro: {macro_id}")
+            
+    elif msg.type == "CancelMacroRequest":
+        macro_id = msg.content.get("macro_id")
+        if executor.cancel_macro(macro_id):
+            logger.info(f"❌ Cancelled macro: {macro_id}")
+        else:
+            logger.warning(f"Could not cancel macro: {macro_id}")
+            
+    elif msg.type == "GetMacroStatusRequest":
+        macro_id = msg.content.get("macro_id")
+        status = executor.get_macro_status(macro_id)
+        if status:
+            logger.info(f"📊 Macro status: {status}")
+            # Send status back to requester
+            await ctx.send(sender, MessageEnvelope(
+                receiver=sender,
+                protocol="macro_executor_protocol",
+                type="MacroStatusResponse",
+                content=status.dict()
+            ))
+        else:
+            logger.warning(f"Could not find macro: {macro_id}")
+            
+    else:
+        logger.warning(f"Received unknown message type: {msg.type}")
+        
 # -------------- Run --------------
 
 macro_executor.include(macro_executor_proto)
 
 if __name__ == "__main__":
     try:
+        print("🚀 Starting Macro Executor Agent...")
+        print("📝 Logging level: INFO")
+        print("🔌 Endpoint: http://127.0.0.1:8002/submit")
+        print("👀 Waiting for macro execution requests...")
         macro_executor.run()
     except OSError as e:
         if "address already in use" in str(e):
