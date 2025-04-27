@@ -87,7 +87,22 @@ def log_event(event_type, key_or_button):
 
 # Keyboard Handlers
 def on_key_press(key):
-    log_event("key_press", getattr(key, 'char', key))
+    # Handle special keys
+    if hasattr(key, 'name'):
+        if key.name == 'cmd':
+            key_str = 'cmd'
+        elif key.name == 'ctrl':
+            key_str = 'ctrl'
+        elif key.name == 'alt':
+            key_str = 'option'
+        elif key.name == 'fn':
+            key_str = 'fn'
+        else:
+            key_str = key.name
+    else:
+        key_str = getattr(key, 'char', str(key))
+    
+    log_event("key_press", key_str)
 
 def on_key_release(key):
     if key == keyboard.Key.esc:
