@@ -182,6 +182,26 @@ const AppPopup: React.FC<AppPopupProps> = ({ isOpen, onClose, app }) => {
               playlist_name: macro.title
             }
           }
+        ] : macro.title === "Create Swift File" ? [
+          {
+            app: "Code",
+            action: "open_file",
+            args: {
+              path: "demo.swift"
+            }
+          },
+          {
+            app: "Code",
+            action: "type",
+            args: {
+              text: "import Foundation\n\n// Your Swift code here"
+            }
+          },
+          {
+            app: "Code",
+            action: "save_file",
+            args: {}
+          }
         ] : [
           {
             app: "Code",
